@@ -1,7 +1,8 @@
 import customtkinter
 import customtkinter as ctk
-from tkinter import filedialog, messagebox, ttk 
+from tkinter import filedialog, messagebox, ttk
 from dataclasses import dataclass
+from PIL import Image, ImageTk
 import json
 
 
@@ -16,6 +17,7 @@ class lego:
     numero_pezzi: int
     prezzo: float
     link: str
+    immagine: str
     
 
 #funzioni:
@@ -39,11 +41,13 @@ agg_set = None
 set_lego = [] 
 percorso = None
 percorso_immagine = None
+referenze_immagini = []
     
 def crea(esiste):
     if esiste == 1:
         global percorso
         global set_lego
+        global percorso_immagine
         percorso=filedialog.askopenfilename()
         if percorso:
             with open(percorso, "r") as file:
@@ -61,12 +65,14 @@ def crea(esiste):
                     numero_pezzi= caricare["numero_pezzi"],
                     prezzo = caricare["prezzo"],
                     link =caricare["link"],
+                    immagine = caricare["immagine"]
                 )
                 set_lego.append(set_caricato)
             
             messagebox.showinfo("Perfetto!", "File caricato con successo!")
-        else:
+        else:            
             messagebox.showwarning("Attenzione!", "Qualcosa è andato storto! Apertura gestore vuoto")
+            set_lego = []
                     
         
     global finestra    
@@ -80,17 +86,18 @@ def crea(esiste):
                 agg_set = customtkinter.CTkToplevel(finestra)
                 agg_set.geometry("1080x720")
                 agg_set.minsize = (1080, 720)
-                agg_set.title("Nuovo set")
-                agg_set.focus_set()
+                agg_set.title("Nuovo set")               
                 agg_set.grab_set()     
                 agg_set.protocol("WM_DELETE_WINDOW", lambda: chiudi(agg_set))   #se premo la x viene eseguito chiudi    
                 
                 
-                #funzione per percorso immagine
+                
                 def immagine():
                     global percorso_immagine
-                    percorso_immagine = filedialog.askopenfilenames()
-                    print(percorso_immagine)
+                    percorso_immagine = None
+                    percorso_immagine = filedialog.askopenfilename()
+                    
+                    
                 
                 
                 
@@ -144,6 +151,7 @@ def crea(esiste):
                 
                 
                 def aggiungere():
+                    global percorso_immagine
                     if not (ent1.get() and ent2.get() and ent3.get() and ent4.get() and ent5.get() and ent6.get() and ent7.get() and ent8.get()):
                         messagebox.showwarning("attenzione!", "Devi compilare tutti i campi!")
                     else:
@@ -166,7 +174,8 @@ def crea(esiste):
                                 id=ent5.get(),
                                 numero_pezzi=numero_pezzi,
                                 prezzo=prezzo,
-                                link=ent8.get()
+                                link=ent8.get(),
+                                immagine=percorso_immagine
                             )
 
                             set_lego.append(nuovo_set)
@@ -199,7 +208,8 @@ def crea(esiste):
                             "id": set.id,
                             "numero_pezzi": set.numero_pezzi,
                             "prezzo": set.prezzo,
-                            "link": set.link
+                            "link": set.link,
+                            "immagine": set.immagine
                         }
                         lista.append(diz)
 
@@ -210,8 +220,8 @@ def crea(esiste):
         #oggetti in finestra:
         
         finestra = customtkinter.CTkToplevel(win)  
-        finestra.geometry("1080x720")
-        finestra.minsize = (1080, 720)
+        finestra.geometry("1600x900")
+        finestra.minsize = (1600, 900)
         finestra.title("Gestore")
         finestra.lift()       
         finestra.protocol("WM_DELETE_WINDOW", lambda: chiudi(finestra))  #se viene premuta la x si esegue la funzione chiudi        
@@ -239,22 +249,20 @@ def crea(esiste):
 
         tabella["columns"] = ("Tipologia", "Nome", "Età", "Anno", "ID", "Numero pezzi", "Prezzo", "Link")
 
-        tabella.column("#0", width=0, stretch=False)
-        tabella.heading("#0", text="")
+        tabella.column("#0", width=80, anchor="center")
+        tabella.heading("#0", text="img")       
 
         for colonna in tabella["columns"]:
-            tabella.column(colonna, anchor="center", width=120)
-            
+            tabella.column(colonna, anchor="center", width=120)            
             tabella.heading(colonna, text=colonna)
 
         tabella.grid(row=1, column=0, columnspan=5, padx=20, pady=20, sticky="nsew")
         
-        #stile per tabella strano
-        
+        #stile per tabella strano        
         finestra.grid_rowconfigure(1, weight=1)
         style = ttk.Style()
         style.theme_use("default")
-        style.configure("Treeview", background="#F8F9FA", foreground="#222222", fieldbackground="#F8F9FA", rowheight=28, font=("Segoe UI", 11))
+        style.configure("Treeview", background="#F8F9FA", foreground="#222222", fieldbackground="#F8F9FA", rowheight=105, font=("Segoe UI", 11))
         style.configure("Treeview.Heading", background="#FFD500", foreground="#222222", font=("Segoe UI", 11, "bold"), relief="flat")      
         style.map("Treeview", background=[("selected", "#4A90E2")], foreground=[("selected", "white")])
         style.map("Treeview.Heading", background=[("active", "#FFC300")])
@@ -264,14 +272,20 @@ def crea(esiste):
            
         
         def aggiorna_tabella():
+            global referenze_immagini
             tabella.delete(*tabella.get_children())
-
+            referenze_immagini.clear()
             for dati in set_lego:
-                tabella.insert("", "end", values=(
+                img_tk = ""                   
+                img_pil = Image.open(dati.immagine).resize((100, 100))
+                img_tk = ImageTk.PhotoImage(img_pil)
+                referenze_immagini.append(img_tk)                         #metto l'immagine in una lista perchè se no non viene mostrata nella tabella                    
+                        
+                tabella.insert("", "end", image=img_tk, values=(
                     dati.tipologia, dati.nome, dati.eta, dati.anno,
-                    dati.id, dati.numero_pezzi, dati.prezzo, dati.link,
+                    dati.id, dati.numero_pezzi, dati.prezzo, dati.link
                 ))
-                
+            
         aggiorna_tabella()      
 
 
