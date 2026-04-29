@@ -41,7 +41,7 @@ agg_set = None
 set_lego = [] 
 percorso = None
 percorso_immagine = None
-referenze_immagini = []
+salva_immagini = []
     
 def crea(esiste):
     if esiste == 1:
@@ -272,14 +272,14 @@ def crea(esiste):
            
         
         def aggiorna_tabella():
-            global referenze_immagini
+            global salva_immagini
             tabella.delete(*tabella.get_children())
-            referenze_immagini.clear()
+            salva_immagini.clear()
             for dati in set_lego:
                 img_tk = ""                   
                 img_pil = Image.open(dati.immagine).resize((100, 100))
                 img_tk = ImageTk.PhotoImage(img_pil)
-                referenze_immagini.append(img_tk)                         #metto l'immagine in una lista perchè se no non viene mostrata nella tabella                    
+                salva_immagini.append(img_tk)                         #metto l'immagine in una lista perchè se no non viene mostrata nella tabella                    
                         
                 tabella.insert("", "end", image=img_tk, values=(
                     dati.tipologia, dati.nome, dati.eta, dati.anno,
