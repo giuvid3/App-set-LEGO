@@ -28,11 +28,7 @@ def chiudi(finestra_da_chiudere):
         if finestra_da_chiudere == finestra:       
             win.deiconify()
         else:
-            pass
-
-
-
-    
+            pass    
 
 #finestre secondarie:
  
@@ -96,12 +92,10 @@ def crea(esiste):
                     global percorso_immagine
                     percorso_immagine = None
                     percorso_immagine = filedialog.askopenfilename()
+                    img = ctk.CTkImage(light_image=Image.open(percorso_immagine), size=(150, 150))                    
+                    salva_immagini.append(img)
+                    foto.configure(image=img)            
                     
-                    
-                
-                
-                
-                
                 
                 #inserimento dati
                 l1 = ctk.CTkLabel(agg_set, text="Tipologia del set lego:" )
@@ -132,7 +126,10 @@ def crea(esiste):
                 limg = ctk.CTkLabel(agg_set, text="Inserisci l'immagine del set:")
                 limg.grid(row=4, column=2, padx=30, pady=20)
                 btnimg = ctk.CTkButton(agg_set, text="Scegli immagine", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command=immagine)
-                btnimg.grid(row=4, column=3, pady=20)
+                btnimg.grid(row=5, column=2)
+                
+                foto = ctk.CTkLabel(agg_set, width=150, height=150, text="")
+                foto.grid(row=4 , column=3)
                 
                 l6 = ctk.CTkLabel(agg_set, text="Numero pezzi:" )
                 l6.grid(row=5, column=0, padx=30, pady=20)
@@ -231,19 +228,19 @@ def crea(esiste):
         nset_btn = ctk.CTkButton(finestra, text="Crea nuovo set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command = aggiungi)
         nset_btn.grid(row = 0, column = 0, padx=15, pady =15)
         
-        mod_btn = ctk.CTkButton(finestra, text="Modifica un set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12)
-        mod_btn.grid(row = 0, column = 1, padx=30, pady =15)
+        
         
         del_btn = ctk.CTkButton(finestra, text="Elimina un set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12)
-        del_btn.grid(row = 0, column = 2, padx=30, pady =15)
+        del_btn.grid(row = 0, column = 1, padx=30, pady =15)
         
         save_btn = ctk.CTkButton(finestra, text="Salva", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command=lambda: salva(0))
-        save_btn.grid(row = 0, column = 3, padx=30, pady =15)
+        save_btn.grid(row = 0, column = 2, padx=30, pady =15)
         
         snome_btn = ctk.CTkButton(finestra, text="Salva con nome", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command=lambda: salva(1))
-        snome_btn.grid(row = 0, column = 4, padx=30, pady =15)
+        snome_btn.grid(row = 0, column = 3, padx=30, pady =15)
         
-        
+        cerca = ctk.CTkButton(finestra, text="Cerca",  width=150, height=30, font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12)
+        cerca.grid(row = 0, column = 4, padx=30, pady =15)
         
         tabella = ttk.Treeview(finestra)
 
