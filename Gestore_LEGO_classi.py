@@ -7,7 +7,7 @@ import json
 
 
 @dataclass
-class lego:
+class Lego:
     tipologia: str
     nome: str
     eta: int
@@ -41,35 +41,40 @@ class App:
         apri_btn=ctk.CTkButton(self.win, text="Apri set già esistenti", width=400, height=100, font=ctk.CTkFont(size=40, weight="bold"), cursor="hand2", corner_radius=32, command=lambda: self.crea(1))
         apri_btn.place(relx=0.5, rely=0.6, anchor="center")  
         
-    #Creazione finestra    
+    #Funzione apertura file esistente
+    def file_esistente(self):
+        self.percorso=filedialog.askopenfilename(defaultextension=".json", title="Scegli salvataggio da caricare", filetypes=[("File JSON", ".json")])
+        if self.percorso:
+            with open(self.percorso, "r") as file:
+                lista = json.load(file)
+                
+            self.set_lego = [] 
+            
+            for caricare in lista:
+                set_caricato = Lego(
+                    tipologia =caricare["tipologia"],
+                    nome =caricare["nome"],
+                    eta = caricare["eta"],
+                    anno =caricare["anno"],
+                    id =caricare["id"],
+                    numero_pezzi= caricare["numero_pezzi"],
+                    prezzo = caricare["prezzo"],
+                    link =caricare["link"],
+                    immagine = caricare["immagine"]
+                )
+                self.set_lego.append(set_caricato)
+            
+            messagebox.showinfo("Perfetto!", "File caricato con successo!")
+        else:            
+            messagebox.showwarning("Attenzione!", "Qualcosa è andato storto! Apertura gestore vuoto")
+            self.set_lego = []
+        
+        
+    #Creazione finestra       
     def crea(self, esiste):
         if esiste == 1:
-            self.percorso=filedialog.askopenfilename(defaultextension=".json", title="Scegli salvataggio da caricare", filetypes=[("File JSON", ".json")])
-            if self.percorso:
-                with open(self.percorso, "r") as file:
-                    lista = json.load(file)
-                    
-                self.set_lego = [] 
-                
-                for caricare in lista:
-                    set_caricato = lego(
-                        tipologia =caricare["tipologia"],
-                        nome =caricare["nome"],
-                        eta = caricare["eta"],
-                        anno =caricare["anno"],
-                        id =caricare["id"],
-                        numero_pezzi= caricare["numero_pezzi"],
-                        prezzo = caricare["prezzo"],
-                        link =caricare["link"],
-                        immagine = caricare["immagine"]
-                    )
-                    self.set_lego.append(set_caricato)
-                
-                messagebox.showinfo("Perfetto!", "File caricato con successo!")
-            else:            
-                messagebox.showwarning("Attenzione!", "Qualcosa è andato storto! Apertura gestore vuoto")
-                self.set_lego = []
-                        
+            self.file_esistente()
+            
         if self.finestra is None or not self.finestra.winfo_exists(): 
             self.finestra = customtkinter.CTkToplevel(self.win)  
             self.finestra.geometry("1600x820")
@@ -77,8 +82,7 @@ class App:
             self.finestra.title("Gestore")
             self.finestra.lift()       
             self.finestra.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.finestra))  #se viene premuta la x si esegue la funzione chiudi        
-            self.win.withdraw()                                                   #viene nascosta la win iniziale
-            
+            self.win.withdraw()                                                  #viene nascosta la win iniziale
             
             nset_btn = ctk.CTkButton(self.finestra, text="Crea nuovo set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command = self.aggiungi)
             nset_btn.grid(row = 0, column = 0, padx=15, pady =15)       
@@ -95,15 +99,14 @@ class App:
             container = ctk.CTkFrame(self.finestra, width=150, height=30, bg_color="transparent", fg_color="transparent")
             container.grid(row = 0, column = 4, padx=30, pady =15)
             
-            reset = ctk.CTkButton(container, width=30, height=30, text="X", fg_color="red", font=ctk.CTkFont(size=21), hover_color="#800000", command= lambda: self.aggiorna_tabella(0))
+            reset = ctk.CTkButton(container, width=30, height=30, text="X", fg_color="red", font=ctk.CTkFont(size=21), hover_color="#800000", command= self.aggiorna_tabella)
             reset.pack(side="left", padx=5)
             
             self.ent_ricerca = ctk.CTkEntry(container, width=200, height=30, font=ctk.CTkFont(size=14, weight="bold"), placeholder_text="Cerca un set...", corner_radius=16)
             self.ent_ricerca.pack(side="left", padx=5)
             
-            cerca = ctk.CTkButton(container, text="Cerca",  width=100, height=30, font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= lambda: self.aggiorna_tabella(1))
-            cerca.pack(side="right", padx=5)            
-            
+            cerca = ctk.CTkButton(container, text="Cerca",  width=100, height=30, font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= self.cerca)
+            cerca.pack(side="right", padx=5)         
             
             #Tabella
             self.tabella = ttk.Treeview(self.finestra)
@@ -128,7 +131,7 @@ class App:
             for i in range(5):
                 self.finestra.grid_columnconfigure(i, weight=1) 
                           
-            self.aggiorna_tabella(0)
+            self.aggiorna_tabella()
     
     #chiusura finestre
     def chiudi(self, finestra_da_chiudere):
@@ -230,41 +233,46 @@ class App:
                     with open(self.percorso, "w") as file:
                         json.dump(lista, file, indent=4)
       
-   #aggiornare tabella                     
-    def aggiorna_tabella(self, cerca):
+    #Caricament oggetti   
+    def carica_tabella(self, info):     
+        img_tk = None
+        if info.immagine:                  
+            img_pil = Image.open(info.immagine).resize((100, 100))
+            img_tk = ImageTk.PhotoImage(img_pil)
+            self.salva_immagini.append(img_tk)                         #metto l'immagine in una lista perchè se no non viene mostrata nella tabella                    
+                    
+        self.tabella.insert("", "end", image=img_tk, values=(
+            info.tipologia, info.nome, info.eta, info.anno,
+            info.id, info.numero_pezzi, info.prezzo, info.link
+        ))
+    #Aggiornamento tabella    
+    def aggiorna_tabella(self):
         self.tabella.delete(*self.tabella.get_children())                  #cancella ogni riga della tabella ttk
         self.salva_immagini = []
+        
         for dati in self.set_lego:
-            if cerca==1:
-                if self.ent_ricerca.get()==dati.tipologia:
-                    img_tk = None
-                    if dati.immagine:                  
-                        img_pil = Image.open(dati.immagine).resize((100, 100))
-                        img_tk = ImageTk.PhotoImage(img_pil)
-                        self.salva_immagini.append(img_tk)                         #metto l'immagine in una lista perchè se no non viene mostrata nella tabella                    
-                                
-                    self.tabella.insert("", "end", image=img_tk, values=(
-                        dati.tipologia, dati.nome, dati.eta, dati.anno,
-                        dati.id, dati.numero_pezzi, dati.prezzo, dati.link
-                    ))                
-            else:
-                img_tk = None 
-                if dati.immagine:                  
-                    img_pil = Image.open(dati.immagine).resize((100, 100))
-                    img_tk = ImageTk.PhotoImage(img_pil)
-                    self.salva_immagini.append(img_tk)                         #metto l'immagine in una lista perchè se no non viene mostrata nella tabella                    
-                            
-                self.tabella.insert("", "end", image=img_tk, values=(
-                    dati.tipologia, dati.nome, dati.eta, dati.anno,
-                    dati.id, dati.numero_pezzi, dati.prezzo, dati.link
-                ))
+            self.carica_tabella(dati)
+    
+    #Ricerca set        
+    def cerca(self):
+        self.tabella.delete(*self.tabella.get_children())                  
+        self.salva_immagini = []
+        
+        ricerca=self.ent_ricerca.get().lower()
+        if self.ent_ricerca.get()=="":
+            self.aggiorna_tabella()
+            return
+            
+        for dati in self.set_lego:
+            if ricerca in str(dati.tipologia).lower() or ricerca in str(dati.nome).lower() or ricerca in str(dati.anno).lower() or ricerca in str(dati.eta).lower() or ricerca in str(dati.id).lower() or ricerca in str(dati.prezzo).lower() or ricerca in str(dati.numero_pezzi).lower():
+                self.carica_tabella(dati)
+        
             
     #Aggiunta set lego            
     def aggiungere(self):
         if not (self.ent1.get() and self.ent2.get() and self.ent3.get() and self.ent4.get() and self.ent5.get() and self.ent6.get() and self.ent7.get() and self.ent8.get()):
             messagebox.showwarning("attenzione!", "Devi compilare tutti i campi!")
         else:
-
             try:
                 eta = int(self.ent3.get())
                 anno = int(self.ent4.get())
@@ -274,7 +282,7 @@ class App:
             except ValueError:
                 messagebox.showwarning("attenzione!", "Anno, numero pezzi e prezzo devono essere numeri!")
             else:
-                nuovo_set = lego(
+                nuovo_set = Lego(
                     tipologia=self.ent1.get(),
                     nome=self.ent2.get(),
                     eta=eta,
@@ -288,7 +296,7 @@ class App:
 
                 self.set_lego.append(nuovo_set)
                 self.chiudi(self.agg_set)
-                self.aggiorna_tabella(0)
+                self.aggiorna_tabella()
     
     #Caricamento immagine            
     def immagine(self):
