@@ -177,7 +177,7 @@ def crea(esiste):
 
                             set_lego.append(nuovo_set)
                             chiudi(agg_set)
-                            aggiorna_tabella()  
+                            aggiorna_tabella() 
                         
                 aggiunta = ctk.CTkButton(agg_set, text="Aggiungi il set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= aggiungere)        
                 aggiunta.grid(row=8, column=0, padx=30, pady=20)        
