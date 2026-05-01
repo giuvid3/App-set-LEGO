@@ -28,6 +28,7 @@ class App:
         self.percorso = None
         self.percorso_immagine = None
         self.salva_immagini = []
+        self.controllo = False
         
         self.win = ctk.CTk()
         self.win.geometry("1080x720")
@@ -67,11 +68,12 @@ class App:
             messagebox.showinfo("Perfetto!", "File caricato con successo!")
         else:            
             messagebox.showwarning("Attenzione!", "Qualcosa è andato storto! Apertura gestore vuoto")
-            self.set_lego = []
+            
         
         
     #Creazione finestra       
     def crea(self, esiste):
+        self.set_lego=[]
         if esiste == 1:
             self.file_esistente()
             
@@ -135,6 +137,8 @@ class App:
     
     #chiusura finestre
     def chiudi(self, finestra_da_chiudere):
+        if self.controllo==True and finestra_da_chiudere== self.finestra:
+            self.sicuro()
         if finestra_da_chiudere is not None and finestra_da_chiudere.winfo_exists():
             finestra_da_chiudere.destroy() 
             if finestra_da_chiudere == self.finestra:       
@@ -143,95 +147,96 @@ class App:
                 pass    
     
     #Finestra aggiunta set lego
-    def aggiungi(self):            
-            if self.agg_set is None or not self.agg_set.winfo_exists():
-                self.agg_set = customtkinter.CTkToplevel(self.finestra)
-                self.agg_set.geometry("1080x720")
-                self.agg_set.minsize = (1080, 720)
-                self.agg_set.title("Nuovo set")               
-                self.agg_set.grab_set()     
-                self.agg_set.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.agg_set))
+    def aggiungi(self):        
+                    
+        if self.agg_set is None or not self.agg_set.winfo_exists():
+            self.agg_set = customtkinter.CTkToplevel(self.finestra)
+            self.agg_set.geometry("1080x720")
+            self.agg_set.minsize = (1080, 720)
+            self.agg_set.title("Nuovo set")               
+            self.agg_set.grab_set()     
+            self.agg_set.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.agg_set))
 
 
-                l1 = ctk.CTkLabel(self.agg_set, text="Tipologia del set lego:" )
-                l1.grid(row=0, column=0, padx=30, pady=20)
-                self.ent1 = ctk.CTkEntry(self.agg_set, width=300)
-                self.ent1.grid(row=0, column=1, padx=30, pady=20)
-                
-                l2 = ctk.CTkLabel(self.agg_set, text="Nome set lego:" )
-                l2.grid(row=1, column=0, padx=30, pady=20)
-                self.ent2 = ctk.CTkEntry(self.agg_set, width=300)
-                self.ent2.grid(row=1, column=1, padx=30, pady=20)
-                
-                l3 = ctk.CTkLabel(self.agg_set, text="Età necessaria:" )
-                l3.grid(row=2, column=0, padx=30, pady=20)
-                self.ent3 = ctk.CTkEntry(self.agg_set, width=300)
-                self.ent3.grid(row=2, column=1, padx=30, pady=20)
-                
-                l4 = ctk.CTkLabel(self.agg_set, text="Anno di uscita:" )
-                l4.grid(row=3, column=0, padx=30, pady=20)
-                self.ent4 = ctk.CTkEntry(self.agg_set, width=300)
-                self.ent4.grid(row=3, column=1, padx=30, pady=20)
-                
-                l5 = ctk.CTkLabel(self.agg_set, text="Id lego:" )
-                l5.grid(row=4, column=0, padx=30, pady=20)
-                self.ent5 = ctk.CTkEntry(self.agg_set, width=300)
-                self.ent5.grid(row=4, column=1, padx=30, pady=20)
-                
-                limg = ctk.CTkLabel(self.agg_set, text="Inserisci l'immagine del set:")
-                limg.grid(row=4, column=2, padx=30, pady=20)
-                btnimg = ctk.CTkButton(self.agg_set, text="Scegli immagine", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= self.immagine)
-                btnimg.grid(row=5, column=2)
-                
-                self.foto = ctk.CTkLabel(self.agg_set, width=150, height=150, text="")
-                self.foto.grid(row=4 , column=3)
-                
-                l6 = ctk.CTkLabel(self.agg_set, text="Numero pezzi:" )
-                l6.grid(row=5, column=0, padx=30, pady=20)
-                self.ent6 = ctk.CTkEntry(self.agg_set, width=300)
-                self.ent6.grid(row=5, column=1, padx=30, pady=20)
-                
-                l7 = ctk.CTkLabel(self.agg_set, text="Prezzo(euro):" )
-                l7.grid(row=6, column=0, padx=30, pady=20)
-                self.ent7 = ctk.CTkEntry(self.agg_set, width=300)
-                self.ent7.grid(row=6, column=1, padx=30, pady=20)
-                
-                l8 = ctk.CTkLabel(self.agg_set, text="Link al sito ufficiale:" )
-                l8.grid(row=7, column=0, padx=30, pady=20)
-                self.ent8 = ctk.CTkEntry(self.agg_set, width=300)
-                self.ent8.grid(row=7, column=1, padx=30, pady=20)
-                
-                aggiunta = ctk.CTkButton(self.agg_set, text="Aggiungi il set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= self.aggiungere)        
-                aggiunta.grid(row=8, column=0, padx=30, pady=20)
+            l1 = ctk.CTkLabel(self.agg_set, text="Tipologia del set lego:" )
+            l1.grid(row=0, column=0, padx=30, pady=20)
+            self.ent1 = ctk.CTkEntry(self.agg_set, width=300)
+            self.ent1.grid(row=0, column=1, padx=30, pady=20)
+            
+            l2 = ctk.CTkLabel(self.agg_set, text="Nome set lego:" )
+            l2.grid(row=1, column=0, padx=30, pady=20)
+            self.ent2 = ctk.CTkEntry(self.agg_set, width=300)
+            self.ent2.grid(row=1, column=1, padx=30, pady=20)
+            
+            l3 = ctk.CTkLabel(self.agg_set, text="Età necessaria:" )
+            l3.grid(row=2, column=0, padx=30, pady=20)
+            self.ent3 = ctk.CTkEntry(self.agg_set, width=300)
+            self.ent3.grid(row=2, column=1, padx=30, pady=20)
+            
+            l4 = ctk.CTkLabel(self.agg_set, text="Anno di uscita:" )
+            l4.grid(row=3, column=0, padx=30, pady=20)
+            self.ent4 = ctk.CTkEntry(self.agg_set, width=300)
+            self.ent4.grid(row=3, column=1, padx=30, pady=20)
+            
+            l5 = ctk.CTkLabel(self.agg_set, text="Id lego:" )
+            l5.grid(row=4, column=0, padx=30, pady=20)
+            self.ent5 = ctk.CTkEntry(self.agg_set, width=300)
+            self.ent5.grid(row=4, column=1, padx=30, pady=20)
+            
+            limg = ctk.CTkLabel(self.agg_set, text="Inserisci l'immagine del set:")
+            limg.grid(row=4, column=2, padx=30, pady=20)
+            btnimg = ctk.CTkButton(self.agg_set, text="Scegli immagine", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= self.immagine)
+            btnimg.grid(row=5, column=2)
+            
+            self.foto = ctk.CTkLabel(self.agg_set, width=150, height=150, text="")
+            self.foto.grid(row=4 , column=3)
+            
+            l6 = ctk.CTkLabel(self.agg_set, text="Numero pezzi:" )
+            l6.grid(row=5, column=0, padx=30, pady=20)
+            self.ent6 = ctk.CTkEntry(self.agg_set, width=300)
+            self.ent6.grid(row=5, column=1, padx=30, pady=20)
+            
+            l7 = ctk.CTkLabel(self.agg_set, text="Prezzo(euro):" )
+            l7.grid(row=6, column=0, padx=30, pady=20)
+            self.ent7 = ctk.CTkEntry(self.agg_set, width=300)
+            self.ent7.grid(row=6, column=1, padx=30, pady=20)
+            
+            l8 = ctk.CTkLabel(self.agg_set, text="Link al sito ufficiale:" )
+            l8.grid(row=7, column=0, padx=30, pady=20)
+            self.ent8 = ctk.CTkEntry(self.agg_set, width=300)
+            self.ent8.grid(row=7, column=1, padx=30, pady=20)
+            
+            aggiunta = ctk.CTkButton(self.agg_set, text="Aggiungi il set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= self.aggiungere)        
+            aggiunta.grid(row=8, column=0, padx=30, pady=20)
                 
     #Salvataggio set LEGO            
     def salva(self,x):
-            if not self.set_lego:
-                messagebox.showwarning("Attenzione!", "Lista vuota!")
-                return
-            else:
-                if self.percorso==None or x == 1:
-                    self.percorso = filedialog.asksaveasfilename(defaultextension=".json", title="Scegli dove salvare i set lego", filetypes=[("File JSON", ".json")])
+        if not self.set_lego:
+            messagebox.showwarning("Attenzione!", "Lista vuota!")
+            return
+        else:
+            if self.percorso==None or x == 1:
+                self.percorso = filedialog.asksaveasfilename(defaultextension=".json", title="Scegli dove salvare i set lego", filetypes=[("File JSON", ".json")])
 
-                if self.percorso:
-                    lista = []
+            if self.percorso:
+                lista = []
 
-                    for set in self.set_lego:
-                        diz = {
-                            "tipologia": set.tipologia,
-                            "nome": set.nome,
-                            "eta": set.eta,
-                            "anno": set.anno,
-                            "id": set.id,
-                            "numero_pezzi": set.numero_pezzi,
-                            "prezzo": set.prezzo,
-                            "link": set.link,
-                            "immagine": set.immagine
-                        }
-                        lista.append(diz)
+                for set in self.set_lego:
+                    diz = {
+                        "tipologia": set.tipologia,
+                        "nome": set.nome,
+                        "eta": set.eta,
+                        "anno": set.anno,
+                        "id": set.id,
+                        "numero_pezzi": set.numero_pezzi,
+                        "prezzo": set.prezzo,
+                        "link": set.link,
+                        "immagine": set.immagine
+                    }
+                    lista.append(diz)
 
-                    with open(self.percorso, "w") as file:
-                        json.dump(lista, file, indent=4)
+                with open(self.percorso, "w") as file:
+                    json.dump(lista, file, indent=4)
       
     #Caricament oggetti   
     def carica_tabella(self, info):     
@@ -267,6 +272,7 @@ class App:
             if ricerca in str(dati.tipologia).lower() or ricerca in str(dati.nome).lower() or ricerca in str(dati.anno).lower() or ricerca in str(dati.eta).lower() or ricerca in str(dati.id).lower() or ricerca in str(dati.prezzo).lower() or ricerca in str(dati.numero_pezzi).lower():
                 self.carica_tabella(dati)
         
+        
             
     #Aggiunta set lego            
     def aggiungere(self):
@@ -297,6 +303,7 @@ class App:
                 self.set_lego.append(nuovo_set)
                 self.chiudi(self.agg_set)
                 self.aggiorna_tabella()
+        self.controllo = True
     
     #Caricamento immagine            
     def immagine(self):
@@ -306,7 +313,13 @@ class App:
             self.salva_immagini.append(img)
             self.foto.configure(image=img)
         
-
+    def sicuro(self):
+        risposta = messagebox.askyesno("Cosa vuoi fare?", "Non hai salvato il lavoro, vuoi salvarlo adesso?")
+        if risposta:
+            self.salva(0)
+        else:
+            pass
+            
                     
    
         
