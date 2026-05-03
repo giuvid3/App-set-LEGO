@@ -3,6 +3,7 @@ import customtkinter as ctk
 from tkinter import filedialog, messagebox, ttk
 from dataclasses import dataclass
 from PIL import Image, ImageTk
+import webbrowser
 import json
 
 
@@ -114,8 +115,9 @@ class App:
             self.tabella = ttk.Treeview(self.finestra)
             self.tabella["columns"] = ("Tipologia", "Nome", "Età", "Anno", "ID", "Numero pezzi", "Prezzo", "Link")
             self.tabella.column("#0", width=80, anchor="center")
-            self.tabella.heading("#0", text="img")       
-
+            self.tabella.heading("#0", text="img") 
+            self.tabella.bind("<Button-1>", self.apri_link)      
+            self.tabella.bind("<Double-1>", self.modifica)
             for colonna in self.tabella["columns"]:
                 self.tabella.column(colonna, anchor="center", width=120)            
                 self.tabella.heading(colonna, text=colonna)
@@ -244,7 +246,7 @@ class App:
         if info.immagine:                  
             img_pil = Image.open(info.immagine).resize((100, 100))
             img_tk = ImageTk.PhotoImage(img_pil)
-            self.salva_immagini.append(img_tk)                         #metto l'immagine in una lista perchè se no non viene mostrata nella tabella                    
+            self.salva_immagini.append(img_tk)                #metto l'immagine in una lista perchè se no non viene mostrata nella tabella                    
                     
         self.tabella.insert("", "end", image=img_tk, values=(
             info.tipologia, info.nome, info.eta, info.anno,
@@ -319,9 +321,20 @@ class App:
             self.salva(0)
         else:
             pass
-            
+    
+    def apri_link(self, event):
+        riga = self.tabella.identify_row(event.y)
+        colonna = self.tabella.identify_column(event.x)
+        cella = self.tabella.identify_region(event.x, event.y)
+        
+        if cella == "cell" and colonna == "#8": 
+            if riga:
+                valori = self.tabella.item(riga, 'values')
+                url = valori[7]
+                webbrowser.open_new_tab(url)      
                     
-   
+    def modifica(self, event):
+        print("gg")
         
 app = App()
 app.win.mainloop()
