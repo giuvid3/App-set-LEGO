@@ -30,6 +30,8 @@ class App:
         self.percorso_immagine = None
         self.salva_immagini = []
         self.controllo = False
+        self.indice=0
+
         
         self.win = ctk.CTk()
         self.win.geometry("1080x720")
@@ -113,11 +115,11 @@ class App:
             
             #Tabella
             self.tabella = ttk.Treeview(self.finestra)
-            self.tabella["columns"] = ("Tipologia", "Nome", "Età", "Anno", "ID", "Numero pezzi", "Prezzo", "Link")
+            self.tabella["columns"] = ("Indice", "Tipologia", "Nome", "Età", "Anno", "ID", "Numero pezzi", "Prezzo", "Link")
             self.tabella.column("#0", width=80, anchor="center")
             self.tabella.heading("#0", text="img") 
             self.tabella.bind("<Button-1>", self.apri_link)      
-            self.tabella.bind("<Double-1>", self.modifica)
+            self.tabella.bind("<Double-1>", self.creamodifica)
             for colonna in self.tabella["columns"]:
                 self.tabella.column(colonna, anchor="center", width=120)            
                 self.tabella.heading(colonna, text=colonna)
@@ -208,8 +210,8 @@ class App:
             self.ent8 = ctk.CTkEntry(self.agg_set, width=300)
             self.ent8.grid(row=7, column=1, padx=30, pady=20)
             
-            aggiunta = ctk.CTkButton(self.agg_set, text="Aggiungi il set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= self.aggiungere)        
-            aggiunta.grid(row=8, column=0, padx=30, pady=20)
+            self.aggiunta = ctk.CTkButton(self.agg_set, text="Aggiungi il set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= self.aggiungere)        
+            self.aggiunta.grid(row=8, column=0, padx=30, pady=20)
                 
     #Salvataggio set LEGO            
     def salva(self,x):
@@ -239,16 +241,18 @@ class App:
 
                 with open(self.percorso, "w") as file:
                     json.dump(lista, file, indent=4)
-      
+        self.controllo = False
     #Caricament oggetti   
     def carica_tabella(self, info):     
         img_tk = None
+
+        self.indice+=1
         if info.immagine:                  
             img_pil = Image.open(info.immagine).resize((100, 100))
             img_tk = ImageTk.PhotoImage(img_pil)
             self.salva_immagini.append(img_tk)                #metto l'immagine in una lista perchè se no non viene mostrata nella tabella                    
                     
-        self.tabella.insert("", "end", image=img_tk, values=(
+        self.tabella.insert("", "end", image=img_tk, values=(self.indice,
             info.tipologia, info.nome, info.eta, info.anno,
             info.id, info.numero_pezzi, info.prezzo, info.link
         ))
@@ -258,6 +262,7 @@ class App:
         self.salva_immagini = []
         
         for dati in self.set_lego:
+            
             self.carica_tabella(dati)
     
     #Ricerca set        
@@ -273,6 +278,17 @@ class App:
         for dati in self.set_lego:
             if ricerca in str(dati.tipologia).lower() or ricerca in str(dati.nome).lower() or ricerca in str(dati.anno).lower() or ricerca in str(dati.eta).lower() or ricerca in str(dati.id).lower() or ricerca in str(dati.prezzo).lower() or ricerca in str(dati.numero_pezzi).lower():
                 self.carica_tabella(dati)
+
+
+            #commento di Vergani: se gotti avesse usato una lista (che sarebe molto comoda in python) per i dati del singolo set lego, questa sintassi più pulita e concisa sarebbe stata possibile:
+            #for i in dati:
+                #if (ricerca in i.lower()):
+                    #self.carica_tabella(dati)
+                    #return
+
+
+            
+
         
         
             
@@ -288,10 +304,10 @@ class App:
                 prezzo = float(self.ent7.get().replace(",", "."))
 
             except ValueError:
-                messagebox.showwarning("attenzione!", "Anno, numero pezzi e prezzo devono essere numeri!")
+                messagebox.showwarning("attenzione!", "Anno, numero, pezzi e prezzo devono essere numeri!")
             else:
                 nuovo_set = Lego(
-                    tipologia=self.ent1.get(),
+                    tipologia= self.ent1.get(),
                     nome=self.ent2.get(),
                     eta=eta,
                     anno=anno,
@@ -301,8 +317,9 @@ class App:
                     link=self.ent8.get(),
                     immagine=self.percorso_immagine
                 )
-
+            
                 self.set_lego.append(nuovo_set)
+                
                 self.chiudi(self.agg_set)
                 self.aggiorna_tabella()
         self.controllo = True
@@ -333,41 +350,58 @@ class App:
                 url = valori[7]
                 webbrowser.open_new_tab(url)      
                     
-    def modifica(self, event):
-        print("gg")
+    def creamodifica(self, event):
+        riga = self.tabella.identify_row(event.y)
+        self.indice = self.tabella.index(riga)
+        
+        if riga:
+            self.aggiungi()
+            self.aggiunta.configure(text = "Modifica set")
+
+            valori = self.tabella.item(riga, 'values')                    
+                    
+            self.ent1.insert(0,valori[1])
+            self.ent2.insert(0,valori[2])
+            self.ent3.insert(0,valori[3])
+            self.ent4.insert(0,valori[4])
+            self.ent5.insert(0,valori[5])
+            self.ent6.insert(0,valori[6])
+            self.ent7.insert(0,valori[7])
+            self.ent8.insert(0,valori[8])
+
+            try:
+                eta = int(self.ent3.get())
+                anno = int(self.ent4.get())
+                numero_pezzi = int(self.ent6.get())
+                prezzo = float(self.ent7.get().replace(",", "."))
+
+            except ValueError:
+                messagebox.showwarning("attenzione!", "Anno, numero, pezzi e prezzo devono essere numeri!")
+            else:
+                nuovo_set = Lego(
+                    tipologia= self.ent1.get(),
+                    nome=self.ent2.get(),
+                    eta=eta,
+                    anno=anno,
+                    id=self.ent5.get(),
+                    numero_pezzi=numero_pezzi,
+                    prezzo=prezzo,
+                    link=self.ent8.get(),
+                    immagine=self.percorso_immagine
+                )
+            
+                self.set_lego.insert(self.indice, nuovo_set)                
+                self.chiudi(self.agg_set)
+                self.aggiorna_tabella()
+        self.controllo = True
+
+            
+
+            
+   
+
+
+
         
 app = App()
 app.win.mainloop()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
