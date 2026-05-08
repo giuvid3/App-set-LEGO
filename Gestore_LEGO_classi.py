@@ -25,6 +25,7 @@ class App:
     def __init__(self):
         self.finestra = None                    #|
         self.agg_set = None                     #|
+        self.info = None                        #|
         self.set_lego = []                      #|
         self.percorso = None                    #|  
         self.percorso_immagine = None           #|  Varibaili globali
@@ -51,8 +52,6 @@ class App:
         if self.percorso:
             with open(self.percorso, "r") as file:
                 lista = json.load(file)
-                
-            self.set_lego = [] 
             
             for caricare in lista:
                 set_caricato = Lego(
@@ -75,7 +74,8 @@ class App:
         
     #Creazione finestra       
     def crea(self, esiste):
-        self.set_lego=[]
+        if esiste == 0:
+            self.set_lego = []
         if esiste == 1:
             self.file_esistente()
             
@@ -88,7 +88,7 @@ class App:
             self.finestra.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.finestra))  #se viene premuta la x si esegue la funzione chiudi        
             self.win.withdraw()
             #viene nascosta la win iniziale
-            info_btn = ctk.CTkButton(self.finestra, text="Informazioni", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12)
+            info_btn = ctk.CTkButton(self.finestra, text="Informazioni", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= self.informazioni)
             info_btn.grid(row = 0, column = 0, padx=30, pady =15)
             
             nset_btn = ctk.CTkButton(self.finestra, text="Crea nuovo set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command = self.aggiungi)
@@ -123,7 +123,7 @@ class App:
             self.tabella.bind("<Button-3>", self.elimina)
             
             for colonna in self.tabella["columns"]:
-                self.tabella.column(colonna, anchor="center", minwidth=120)            
+                self.tabella.column(colonna, anchor="center", width=120)            
                 self.tabella.heading(colonna, text=colonna)
 
             self.tabella.grid(row=1, column=0, columnspan=5, padx=20, pady=20, sticky="nsew")
@@ -396,7 +396,22 @@ class App:
                 self.controllo_senza_salvare = True
             else:
                 pass    
-
+    
+    def informazioni(self):
+        if self.info is None or not self.info.winfo_exists():
+            self.info = customtkinter.CTkToplevel(self.finestra)
+            self.info.geometry("1080x720")
+            self.info.minsize = (1080, 900)
+            self.info.config(background="white")
+            self.info.title("Informazioni sul programma")               
+            self.info.grab_set()     
+            self.info.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.info))
+            
+            self.frame = ctk.CTkScrollableFrame(self.info, fg_color="white")
+            self.frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+            
+            self.info.grid_rowconfigure(0, weight=1)
+            self.info.grid_columnconfigure(0, weight=1)
         
 app = App()
 app.win.mainloop()
