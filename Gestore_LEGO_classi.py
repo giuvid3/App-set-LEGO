@@ -23,14 +23,14 @@ class App:
     
     #Creazione win iniziale
     def __init__(self):
-        self.finestra = None
-        self.agg_set = None 
-        self.set_lego = [] 
-        self.percorso = None
-        self.percorso_immagine = None
-        self.salva_immagini = []
-        self.controllo = False
-        self.indice=0
+        self.finestra = None                    #|
+        self.agg_set = None                     #|
+        self.set_lego = []                      #|
+        self.percorso = None                    #|  
+        self.percorso_immagine = None           #|  Varibaili globali
+        self.salva_immagini = []                #|
+        self.controllo_senza_salvare = False    #|
+        self.indice= None                       #|
 
         
         self.win = ctk.CTk()
@@ -67,12 +67,11 @@ class App:
                     immagine = caricare["immagine"]
                 )
                 self.set_lego.append(set_caricato)
+                
             
             messagebox.showinfo("Perfetto!", "File caricato con successo!")
         else:            
             messagebox.showwarning("Attenzione!", "Qualcosa è andato storto! Apertura gestore vuoto")
-            
-        
         
     #Creazione finestra       
     def crea(self, esiste):
@@ -87,13 +86,13 @@ class App:
             self.finestra.title("Gestore")
             self.finestra.lift()       
             self.finestra.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.finestra))  #se viene premuta la x si esegue la funzione chiudi        
-            self.win.withdraw()                                                  #viene nascosta la win iniziale
+            self.win.withdraw()
+            #viene nascosta la win iniziale
+            info_btn = ctk.CTkButton(self.finestra, text="Informazioni", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12)
+            info_btn.grid(row = 0, column = 0, padx=30, pady =15)
             
             nset_btn = ctk.CTkButton(self.finestra, text="Crea nuovo set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command = self.aggiungi)
-            nset_btn.grid(row = 0, column = 0, padx=15, pady =15)       
-            
-            del_btn = ctk.CTkButton(self.finestra, text="Elimina un set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12)
-            del_btn.grid(row = 0, column = 1, padx=30, pady =15)
+            nset_btn.grid(row = 0, column = 1, padx=15, pady =15)     
             
             save_btn = ctk.CTkButton(self.finestra, text="Salva", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command=lambda: self.salva(0))
             save_btn.grid(row = 0, column = 2, padx=30, pady =15)
@@ -115,13 +114,16 @@ class App:
             
             #Tabella
             self.tabella = ttk.Treeview(self.finestra)
-            self.tabella["columns"] = ("Indice", "Tipologia", "Nome", "Età", "Anno", "ID", "Numero pezzi", "Prezzo", "Link")
+            self.tabella["columns"] = ("Tipologia", "Nome", "Età", "Anno", "ID", "Numero pezzi", "Prezzo", "Link")
             self.tabella.column("#0", width=80, anchor="center")
-            self.tabella.heading("#0", text="img") 
+            self.tabella.heading("#0", text="img")
+             
             self.tabella.bind("<Button-1>", self.apri_link)      
-            self.tabella.bind("<Double-1>", self.creamodifica)
+            self.tabella.bind("<Double-1>", self.modifica)
+            self.tabella.bind("<Button-3>", self.elimina)
+            
             for colonna in self.tabella["columns"]:
-                self.tabella.column(colonna, anchor="center", width=120)            
+                self.tabella.column(colonna, anchor="center", minwidth=120)            
                 self.tabella.heading(colonna, text=colonna)
 
             self.tabella.grid(row=1, column=0, columnspan=5, padx=20, pady=20, sticky="nsew")
@@ -141,7 +143,7 @@ class App:
     
     #chiusura finestre
     def chiudi(self, finestra_da_chiudere):
-        if self.controllo==True and finestra_da_chiudere== self.finestra:
+        if self.controllo_senza_salvare==True and finestra_da_chiudere== self.finestra:
             self.sicuro()
         if finestra_da_chiudere is not None and finestra_da_chiudere.winfo_exists():
             finestra_da_chiudere.destroy() 
@@ -210,9 +212,47 @@ class App:
             self.ent8 = ctk.CTkEntry(self.agg_set, width=300)
             self.ent8.grid(row=7, column=1, padx=30, pady=20)
             
-            self.aggiunta = ctk.CTkButton(self.agg_set, text="Aggiungi il set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= self.aggiungere)        
+            self.aggiunta = ctk.CTkButton(self.agg_set, text="Aggiungi il set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= lambda: self.aggiungere(0))        
             self.aggiunta.grid(row=8, column=0, padx=30, pady=20)
-                
+    
+    #Aggiunta set lego            
+    def aggiungere(self, x):
+        if not (self.ent1.get() and self.ent2.get() and self.ent3.get() and self.ent4.get() and self.ent5.get() and self.ent6.get() and self.ent7.get() and self.ent8.get()):
+            messagebox.showwarning("attenzione!", "Devi compilare tutti i campi!")
+        elif not self.foto.cget("image"):
+            messagebox.showwarning("attenzione!", "Foto mancante, inseriscine una!")
+            
+        else:
+            try:
+                eta = int(self.ent3.get())
+                anno = int(self.ent4.get())
+                numero_pezzi = int(self.ent6.get())
+                prezzo = float(self.ent7.get().replace(",", "."))
+
+            except ValueError:
+                messagebox.showwarning("attenzione!", "Anno, numero, pezzi e prezzo devono essere numeri!")
+            else:
+                nuovo_set = Lego(
+                    tipologia= self.ent1.get(),
+                    nome=self.ent2.get(),
+                    eta=eta,
+                    anno=anno,
+                    id=self.ent5.get(),
+                    numero_pezzi=numero_pezzi,
+                    prezzo=prezzo,
+                    link=self.ent8.get(),
+                    immagine=self.percorso_immagine
+                )
+                if x == 0:
+                    self.set_lego.append(nuovo_set)                    
+                else:
+                    self.set_lego[self.indice] = nuovo_set
+                    
+                self.aggiorna_tabella()
+                self.chiudi(self.agg_set)
+               
+        self.controllo_senza_salvare = True            
+    
     #Salvataggio set LEGO            
     def salva(self,x):
         if not self.set_lego:
@@ -241,30 +281,38 @@ class App:
 
                 with open(self.percorso, "w") as file:
                     json.dump(lista, file, indent=4)
-        self.controllo = False
-    #Caricament oggetti   
-    def carica_tabella(self, info):     
+        self.controllo_senza_salvare = False
+    
+    #Se non hai salvato il lavoro  
+    def sicuro(self):
+        risposta = messagebox.askyesno("Cosa vuoi fare?", "Non hai salvato il lavoro, vuoi salvarlo adesso?")
+        if risposta:
+            self.salva(0)
+        else:
+            pass
+    
+    #Aggiornamento tabella   
+    def carica_tabella(self, info, indice_reale):     
         img_tk = None
 
-        self.indice+=1
         if info.immagine:                  
             img_pil = Image.open(info.immagine).resize((100, 100))
             img_tk = ImageTk.PhotoImage(img_pil)
             self.salva_immagini.append(img_tk)                #metto l'immagine in una lista perchè se no non viene mostrata nella tabella                    
                     
-        self.tabella.insert("", "end", image=img_tk, values=(self.indice,
+        self.tabella.insert("", "end", iid=str(indice_reale), image=img_tk, values=(
             info.tipologia, info.nome, info.eta, info.anno,
-            info.id, info.numero_pezzi, info.prezzo, info.link
+            info.id, info.numero_pezzi, str(info.prezzo) + " €", info.link
         ))
-    #Aggiornamento tabella    
+        
     def aggiorna_tabella(self):
         self.tabella.delete(*self.tabella.get_children())                  #cancella ogni riga della tabella ttk
         self.salva_immagini = []
         
-        for dati in self.set_lego:
+        for indice, dati in enumerate(self.set_lego):                     #enumerate serve a trovare indice del set
             
-            self.carica_tabella(dati)
-    
+            self.carica_tabella(dati, indice)
+        
     #Ricerca set        
     def cerca(self):
         self.tabella.delete(*self.tabella.get_children())                  
@@ -275,70 +323,29 @@ class App:
             self.aggiorna_tabella()
             return
             
-        for dati in self.set_lego:
+        for indice, dati in enumerate(self.set_lego):
             if ricerca in str(dati.tipologia).lower() or ricerca in str(dati.nome).lower() or ricerca in str(dati.anno).lower() or ricerca in str(dati.eta).lower() or ricerca in str(dati.id).lower() or ricerca in str(dati.prezzo).lower() or ricerca in str(dati.numero_pezzi).lower():
-                self.carica_tabella(dati)
-
-
+                self.carica_tabella(dati, indice)
+                    
             #commento di Vergani: se gotti avesse usato una lista (che sarebe molto comoda in python) per i dati del singolo set lego, questa sintassi più pulita e concisa sarebbe stata possibile:
             #for i in dati:
                 #if (ricerca in i.lower()):
                     #self.carica_tabella(dati)
-                    #return
-
-
-            
-
-        
-        
-            
-    #Aggiunta set lego            
-    def aggiungere(self):
-        if not (self.ent1.get() and self.ent2.get() and self.ent3.get() and self.ent4.get() and self.ent5.get() and self.ent6.get() and self.ent7.get() and self.ent8.get()):
-            messagebox.showwarning("attenzione!", "Devi compilare tutti i campi!")
-        else:
-            try:
-                eta = int(self.ent3.get())
-                anno = int(self.ent4.get())
-                numero_pezzi = int(self.ent6.get())
-                prezzo = float(self.ent7.get().replace(",", "."))
-
-            except ValueError:
-                messagebox.showwarning("attenzione!", "Anno, numero, pezzi e prezzo devono essere numeri!")
-            else:
-                nuovo_set = Lego(
-                    tipologia= self.ent1.get(),
-                    nome=self.ent2.get(),
-                    eta=eta,
-                    anno=anno,
-                    id=self.ent5.get(),
-                    numero_pezzi=numero_pezzi,
-                    prezzo=prezzo,
-                    link=self.ent8.get(),
-                    immagine=self.percorso_immagine
-                )
-            
-                self.set_lego.append(nuovo_set)
-                
-                self.chiudi(self.agg_set)
-                self.aggiorna_tabella()
-        self.controllo = True
+                    #return      
     
-    #Caricamento immagine            
-    def immagine(self):
-        self.percorso_immagine = filedialog.askopenfilename(defaultextension=".png", title="Scegli un'immagine", filetypes=[("File immagine", "*.png *.jpg *.jpeg")])
-        if self.percorso_immagine:
-            img = ctk.CTkImage(light_image=Image.open(self.percorso_immagine), size=(150, 150))
+    #Caricamento immagine
+    def aggiunta_immagine(self, percorso):
+        if percorso:
+            img = ctk.CTkImage(light_image=Image.open(percorso), size=(150, 150))
             self.salva_immagini.append(img)
             self.foto.configure(image=img)
         
-    def sicuro(self):
-        risposta = messagebox.askyesno("Cosa vuoi fare?", "Non hai salvato il lavoro, vuoi salvarlo adesso?")
-        if risposta:
-            self.salva(0)
-        else:
-            pass
+                
+    def immagine(self):
+        self.percorso_immagine = filedialog.askopenfilename(defaultextension=".png", title="Scegli un'immagine", filetypes=[("File immagine", "*.png *.jpg *.jpeg")])       
+        self.aggiunta_immagine(self.percorso_immagine)
     
+    #apertura link
     def apri_link(self, event):
         riga = self.tabella.identify_row(event.y)
         colonna = self.tabella.identify_column(event.x)
@@ -348,59 +355,47 @@ class App:
             if riga:
                 valori = self.tabella.item(riga, 'values')
                 url = valori[7]
-                webbrowser.open_new_tab(url)      
-                    
-    def creamodifica(self, event):
+                if url:
+                    webbrowser.open_new_tab(url)      
+    
+    #modifica set                
+    def modifica(self, event):
         riga = self.tabella.identify_row(event.y)
-        self.indice = self.tabella.index(riga)
         
-        if riga:
+       
+        if riga and riga != "":                               #controllo che non vengano cliccati i titoli
+            self.indice = int(riga)
+            self.percorso_immagine = self.set_lego[self.indice].immagine
+            
             self.aggiungi()
-            self.aggiunta.configure(text = "Modifica set")
-
-            valori = self.tabella.item(riga, 'values')                    
-                    
-            self.ent1.insert(0,valori[1])
-            self.ent2.insert(0,valori[2])
-            self.ent3.insert(0,valori[3])
-            self.ent4.insert(0,valori[4])
-            self.ent5.insert(0,valori[5])
-            self.ent6.insert(0,valori[6])
-            self.ent7.insert(0,valori[7])
-            self.ent8.insert(0,valori[8])
-
-            try:
-                eta = int(self.ent3.get())
-                anno = int(self.ent4.get())
-                numero_pezzi = int(self.ent6.get())
-                prezzo = float(self.ent7.get().replace(",", "."))
-
-            except ValueError:
-                messagebox.showwarning("attenzione!", "Anno, numero, pezzi e prezzo devono essere numeri!")
-            else:
-                nuovo_set = Lego(
-                    tipologia= self.ent1.get(),
-                    nome=self.ent2.get(),
-                    eta=eta,
-                    anno=anno,
-                    id=self.ent5.get(),
-                    numero_pezzi=numero_pezzi,
-                    prezzo=prezzo,
-                    link=self.ent8.get(),
-                    immagine=self.percorso_immagine
-                )
+            self.aggiunta.configure(text = "Modifica set", command= lambda: self.aggiungere(1))
+            self.agg_set.title("Modifica set")    
             
-                self.set_lego.insert(self.indice, nuovo_set)                
-                self.chiudi(self.agg_set)
+            self.aggiunta_immagine(self.set_lego[self.indice].immagine)      # perchè se modifico un secondo set senza cambiare immagine prende quelle vecchia
+
+            valori = self.tabella.item(riga, 'values')                   
+            self.ent1.insert(0,valori[0])
+            self.ent2.insert(0,valori[1])
+            self.ent3.insert(0,valori[2])
+            self.ent4.insert(0,valori[3])
+            self.ent5.insert(0,valori[4])
+            self.ent6.insert(0,valori[5])
+            self.ent7.insert(0,valori[6].replace("€", ""))
+            self.ent8.insert(0,valori[7])
+
+    #Elimina set lego
+    def elimina(self, event):
+        riga = self.tabella.identify_row(event.y)
+        
+        if riga and riga != "":
+            self.indice = int(riga)
+            domanda=messagebox.askyesno("Richiesta eliminazione", "Sei sicuro di eliminare il set? verrà perso per sempre") 
+            if domanda:            
+                self.set_lego.pop(self.indice)      
                 self.aggiorna_tabella()
-        self.controllo = True
-
-            
-
-            
-   
-
-
+                self.controllo_senza_salvare = True
+            else:
+                pass    
 
         
 app = App()
