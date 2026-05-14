@@ -50,6 +50,7 @@ class App:
     def file_esistente(self):
         self.percorso=filedialog.askopenfilename(defaultextension=".json", title="Scegli salvataggio da caricare", filetypes=[("File JSON", ".json")])
         if self.percorso:
+            
             with open(self.percorso, "r") as file:
                 lista = json.load(file)
             
@@ -261,7 +262,6 @@ class App:
         else:
             if self.percorso==None or x == 1:
                 self.percorso = filedialog.asksaveasfilename(defaultextension=".json", title="Scegli dove salvare i set lego", filetypes=[("File JSON", ".json")])
-
             if self.percorso:
                 lista = []
 
