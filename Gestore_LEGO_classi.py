@@ -28,7 +28,7 @@ class App:
         self.info = None                        #|
         self.set_lego = []                      #|
         self.percorso = None                    #|  
-        self.percorso_immagine = None           #|  Varibaili globali
+        self.percorso_immagine = None           #|  Varibaili generali
         self.salva_immagini = []                #|
         self.controllo_senza_salvare = False    #|
         self.indice= None                       #|
@@ -142,7 +142,7 @@ class App:
                           
             self.aggiorna_tabella()
     
-    #chiusura finestre
+    #Chiusura finestre
     def chiudi(self, finestra_da_chiudere):
         if self.controllo_senza_salvare==True and finestra_da_chiudere== self.finestra:
             self.sicuro()
@@ -257,7 +257,7 @@ class App:
     #Salvataggio set LEGO            
     def salva(self,x):
         if not self.set_lego:
-            messagebox.showwarning("Attenzione!", "Lista vuota!")
+            messagebox.showwarning("Attenzione!", "Nessun set LEGO inserito!")
             return
         else:
             if self.percorso==None or x == 1:
@@ -339,13 +339,13 @@ class App:
             img = ctk.CTkImage(light_image=Image.open(percorso), size=(150, 150))
             self.salva_immagini.append(img)
             self.foto.configure(image=img)
-        
-                
+      
+    #Aggiunta immagine              
     def immagine(self):
         self.percorso_immagine = filedialog.askopenfilename(defaultextension=".png", title="Scegli un'immagine", filetypes=[("File immagine", "*.png *.jpg *.jpeg")])       
         self.aggiunta_immagine(self.percorso_immagine)
     
-    #apertura link
+    #Apertura link
     def apri_link(self, event):
         riga = self.tabella.identify_row(event.y)
         colonna = self.tabella.identify_column(event.x)
@@ -358,7 +358,7 @@ class App:
                 if url:
                     webbrowser.open_new_tab(url)      
     
-    #modifica set                
+    #Modifica set                
     def modifica(self, event):
         riga = self.tabella.identify_row(event.y)
         
@@ -397,6 +397,7 @@ class App:
             else:
                 pass    
     
+    #Informazione sul programma
     def informazioni(self):
         if self.info is None or not self.info.winfo_exists():
             self.info = customtkinter.CTkToplevel(self.finestra)
@@ -408,10 +409,76 @@ class App:
             self.info.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.info))
             
             self.frame = ctk.CTkScrollableFrame(self.info, fg_color="white")
-            self.frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+            self.frame.grid(row=0, column=0, padx=10, pady=20, sticky="nsew")
             
             self.info.grid_rowconfigure(0, weight=1)
             self.info.grid_columnconfigure(0, weight=1)
-        
+            
+            titolo = ctk.CTkLabel(self.frame, text="GESTORE SET LEGO", font=ctk.CTkFont(size=30, weight="bold"))
+            titolo.pack(pady=(10, 25))
+            
+            testo = """
+                Autore
+                ------------------------
+                Applicazione sviluppata da Davide Gotti.
+
+                Scopo dell'applicazione
+                ------------------------
+                Questo programma permette di creare e gestire una collezione di set LEGO.
+                È possibile aggiungere, modificare, eliminare, cercare e salvare i set
+                all'interno di file JSON.
+
+                Funzionalità principali
+                ------------------------
+                • Creazione di nuovi set LEGO
+                • Modifica dei set esistenti
+                • Eliminazione dei set
+                • Ricerca rapida nella tabella
+                • Salvataggio e caricamento dei dati
+                • Gestione immagini dei set
+                • Apertura del link ufficiale direttamente dal programma
+
+                Comandi rapidi
+                ------------------------
+                • Doppio click su una riga:
+                Modifica il set selezionato.
+
+                • Click destro su una riga:
+                Elimina il set selezionato.
+
+                • Click sul link:
+                Apre il sito ufficiale del set nel browser.
+
+                • Pulsante "Salva":
+                Salva il file corrente.
+
+                • Pulsante "Salva con nome":
+                Salva il progetto in un nuovo file JSON.
+
+                • Barra di ricerca:
+                Permette di trovare rapidamente un set tramite:
+                nome, tipologia, anno, ID, prezzo o numero pezzi.
+
+                Formato dei dati
+                ------------------------
+                I set vengono salvati in formato JSON per garantire:
+                • semplicità
+                • leggibilità
+                • compatibilità
+                • facilità di modifica
+
+                Copyright
+                ------------------------
+                © 2026 Davide Gotti
+                Tutti i diritti riservati.
+
+                Questo software è stato realizzato a scopo didattico e personale.
+                        """
+                        
+                        
+            lbtesto = ctk.CTkLabel(self.frame, text=testo, justify="left", anchor="w", font=ctk.CTkFont(size=16))
+            lbtesto.pack(fill="both", expand=True, padx=20, pady=10)
+            
+            
 app = App()
 app.win.mainloop()
