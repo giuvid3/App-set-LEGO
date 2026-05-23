@@ -52,6 +52,7 @@ class App:
         if self.percorso:
             
             with open(self.percorso, "r") as file:
+                
                 lista = json.load(file)
             
             for caricare in lista:
@@ -83,7 +84,7 @@ class App:
         if self.finestra is None or not self.finestra.winfo_exists(): 
             self.finestra = customtkinter.CTkToplevel(self.win)  
             self.finestra.geometry("1600x820")
-            self.finestra.minsize = (1600, 820)
+            self.finestra.minsize(1600, 820)
             self.finestra.title("Gestore")
             self.finestra.lift()       
             self.finestra.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.finestra))  #se viene premuta la x si esegue la funzione chiudi        
@@ -159,7 +160,7 @@ class App:
         if self.agg_set is None or not self.agg_set.winfo_exists():
             self.agg_set = customtkinter.CTkToplevel(self.finestra)
             self.agg_set.geometry("1080x720")
-            self.agg_set.minsize = (1080, 720)
+            self.agg_set.minsize(1080, 720)
             self.agg_set.title("Nuovo set")               
             self.agg_set.grab_set()     
             self.agg_set.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.agg_set))
@@ -222,14 +223,23 @@ class App:
             messagebox.showwarning("attenzione!", "Devi compilare tutti i campi!")
         elif not self.foto.cget("image"):
             messagebox.showwarning("attenzione!", "Foto mancante, inseriscine una!")
-            
+         
         else:
+            for i in self.set_lego:
+                    if i.id == self.ent5.get():
+                        messagebox.showwarning("Attenzione!", "Id set lego già esistente! Inseriscine un'altro")
+                        return
             try:
                 eta = int(self.ent3.get())
                 anno = int(self.ent4.get())
                 numero_pezzi = int(self.ent6.get())
                 prezzo = float(self.ent7.get().replace(",", "."))
-
+                
+                if (eta < 0 or anno < 0 or numero_pezzi < 0 or prezzo < 0):
+                    messagebox.showwarning("attenzione!", "Controlla che i valori di età, anno, numero pezzi e prezzo siano positivi!") 
+                    return
+                
+                
             except ValueError:
                 messagebox.showwarning("attenzione!", "Anno, numero, pezzi e prezzo devono essere numeri!")
             else:
@@ -252,7 +262,7 @@ class App:
                 self.aggiorna_tabella()
                 self.chiudi(self.agg_set)
                
-        self.controllo_senza_salvare = True            
+                self.controllo_senza_salvare = True            
     
     #Salvataggio set LEGO            
     def salva(self,x):
@@ -355,9 +365,10 @@ class App:
             if riga:
                 valori = self.tabella.item(riga, 'values')
                 url = valori[7]
-                if url:
+                if url.startswith("http://") or url.startswith("https://"):
                     webbrowser.open_new_tab(url)      
-    
+                else:
+                    messagebox.showwarning("Attenzione!", "Link non valido")
     #Modifica set                
     def modifica(self, event):
         riga = self.tabella.identify_row(event.y)
@@ -402,7 +413,7 @@ class App:
         if self.info is None or not self.info.winfo_exists():
             self.info = customtkinter.CTkToplevel(self.finestra)
             self.info.geometry("1080x720")
-            self.info.minsize = (1080, 900)
+            self.info.minsize(1080, 900)
             self.info.config(background="white")
             self.info.title("Informazioni sul programma")               
             self.info.grab_set()     
@@ -478,6 +489,7 @@ class App:
                         
             lbtesto = ctk.CTkLabel(self.frame, text=testo, justify="left", anchor="w", font=ctk.CTkFont(size=16))
             lbtesto.pack(fill="both", expand=True, padx=20, pady=10)
+    
             
             
 app = App()
