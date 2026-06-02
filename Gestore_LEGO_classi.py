@@ -520,8 +520,7 @@ class App:
                         
             lbtesto = ctk.CTkLabel(self.frame, text=testo, justify="left", anchor="w", font=ctk.CTkFont(size=16))
             lbtesto.pack(fill="both", expand=True, padx=20, pady=10)
-    
-            
+          
             
 app = App()
 app.win.mainloop()
