@@ -37,9 +37,15 @@ class App:
         self.win = ctk.CTk()
         self.win.geometry("1080x720")
         self.win.title("Gestore set LEGO")
-        self.win.resizable(True, True)
+        self.win.resizable(False, False)
         self.win.minsize(1080, 720)
-
+        self.win.wm_iconbitmap("icona.ico")
+        img_sfondo = ctk.CTkImage(light_image=Image.open("sfondo.png"), dark_image=Image.open("sfondo.png"), size=(1080, 720) 
+    )
+    
+        self.label_sfondo = ctk.CTkLabel(self.win, image=img_sfondo, text="")
+        self.label_sfondo.place(x=0, y=0, relwidth=1, relheight=1)
+        
         crea_btn = ctk.CTkButton(self.win, text="Crea nuovo gestore", width=400, height=100 , font=ctk.CTkFont(size=40, weight="bold"), cursor="hand2", corner_radius=32, command= lambda: self.crea(0))
         crea_btn.place(relx=0.5, rely=0.4, anchor="center")
 
