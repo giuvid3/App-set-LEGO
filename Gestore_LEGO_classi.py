@@ -52,27 +52,38 @@ class App:
         if self.percorso:
             
             with open(self.percorso, "r") as file:
-                
                 lista = json.load(file)
+                
+
+            if not isinstance(lista, list):
+                messagebox.showerror("Errore", "Formato file non valido, apertura gestore vuoto")
+                return
+
+            if len(lista) == 0:
+                messagebox.showwarning("Attenzione", "Il file è vuoto")
+                return
+            self.set_lego = []
             
             for caricare in lista:
-                set_caricato = Lego(
-                    tipologia =caricare["tipologia"],
-                    nome =caricare["nome"],
-                    eta = caricare["eta"],
-                    anno =caricare["anno"],
-                    id =caricare["id"],
-                    numero_pezzi= caricare["numero_pezzi"],
-                    prezzo = caricare["prezzo"],
-                    link =caricare["link"],
-                    immagine = caricare["immagine"]
-                )
-                self.set_lego.append(set_caricato)
-                
+                try:
+                    set_caricato = Lego(
+                        tipologia =caricare["tipologia"],
+                        nome =caricare["nome"],
+                        eta = caricare["eta"],
+                        anno =caricare["anno"],
+                        id =caricare["id"],
+                        numero_pezzi= caricare["numero_pezzi"],
+                        prezzo = caricare["prezzo"],
+                        link =caricare["link"],
+                        immagine = caricare["immagine"]
+                    )
+                    self.set_lego.append(set_caricato)
+                except:
+                    messagebox.showerror("Errore", "Formato file non valido, apertura gestore vuoto")
+                    return
+                    
             
             messagebox.showinfo("Perfetto!", "File caricato con successo!")
-        else:            
-            messagebox.showwarning("Attenzione!", "Qualcosa è andato storto! Apertura gestore vuoto")
         
     #Creazione finestra       
     def crea(self, esiste):
@@ -116,21 +127,26 @@ class App:
             
             #Tabella
             self.tabella = ttk.Treeview(self.finestra)
-            self.tabella["columns"] = ("Tipologia", "Nome", "Età", "Anno", "ID", "Numero pezzi", "Prezzo", "Link")
+            self.tabella["columns"] = ("Indice", "Tipologia", "Nome", "Età", "Anno", "ID", "Numero pezzi", "Prezzo", "Link")
             self.tabella.column("#0", width=80, anchor="center")
             self.tabella.heading("#0", text="img")
+            self.tabella.column("Indice", width=50, anchor="center")
+            self.tabella.heading("Indice", text="Indice")
              
             self.tabella.bind("<Button-1>", self.apri_link)      
             self.tabella.bind("<Double-1>", self.modifica)
             self.tabella.bind("<Button-3>", self.elimina)
             
-            for colonna in self.tabella["columns"]:
+            for colonna in self.tabella["columns"][1:]:
                 self.tabella.column(colonna, anchor="center", width=120)            
                 self.tabella.heading(colonna, text=colonna)
+                
+            scrollbar = ctk.CTkScrollbar(self.finestra, orientation="vertical", command=self.tabella.yview)
+            self.tabella.configure(yscrollcommand=scrollbar.set)
 
+            scrollbar.grid(row=1, column=5, sticky="ns")
             self.tabella.grid(row=1, column=0, columnspan=5, padx=20, pady=20, sticky="nsew")
             
-            #stile per tabella strano        
             self.finestra.grid_rowconfigure(1, weight=1)
             style = ttk.Style()
             style.theme_use("default")
@@ -138,6 +154,7 @@ class App:
             style.configure("Treeview.Heading", background="#FFD500", foreground="#222222", font=("Segoe UI", 11, "bold"), relief="flat")      
             style.map("Treeview", background=[("selected", "#4A90E2")], foreground=[("selected", "white")])
             style.map("Treeview.Heading", background=[("active", "#FFC300")])
+            
             for i in range(5):
                 self.finestra.grid_columnconfigure(i, weight=1) 
                           
@@ -226,7 +243,7 @@ class App:
          
         else:
             for i in self.set_lego:
-                    if i.id == self.ent5.get():
+                    if i.id == self.ent5.get() and x ==0 :
                         messagebox.showwarning("Attenzione!", "Id set lego già esistente! Inseriscine un'altro")
                         return
             try:
@@ -242,6 +259,7 @@ class App:
                 
             except ValueError:
                 messagebox.showwarning("attenzione!", "Anno, numero, pezzi e prezzo devono essere numeri!")
+                return
             else:
                 nuovo_set = Lego(
                     tipologia= self.ent1.get(),
@@ -306,18 +324,23 @@ class App:
         img_tk = None
 
         if info.immagine:                  
-            img_pil = Image.open(info.immagine).resize((100, 100))
-            img_tk = ImageTk.PhotoImage(img_pil)
-            self.salva_immagini.append(img_tk)                #metto l'immagine in una lista perchè se no non viene mostrata nella tabella                    
+            try:
+                img_pil = Image.open(info.immagine).resize((100, 100))
+                img_tk = ImageTk.PhotoImage(img_pil)
+                self.salva_immagini.append(img_tk)             #metto l'immagine in una lista perchè se no non viene mostrata nella tabella  
+            except:
+                img_tk =None
+                                              
                     
         self.tabella.insert("", "end", iid=str(indice_reale), image=img_tk, values=(
-            info.tipologia, info.nome, info.eta, info.anno,
+            indice_reale + 1, info.tipologia, info.nome, info.eta, info.anno,
             info.id, info.numero_pezzi, str(info.prezzo) + " €", info.link
         ))
         
     def aggiorna_tabella(self):
-        self.tabella.delete(*self.tabella.get_children())                  #cancella ogni riga della tabella ttk
         self.salva_immagini = []
+        self.tabella.delete(*self.tabella.get_children())                  #cancella ogni riga della tabella ttk
+        
         
         for indice, dati in enumerate(self.set_lego):                     #enumerate serve a trovare indice del set
             
@@ -328,7 +351,7 @@ class App:
         self.tabella.delete(*self.tabella.get_children())                  
         self.salva_immagini = []
         
-        ricerca=self.ent_ricerca.get().lower()
+        ricerca=self.ent_ricerca.get().lower().strip()
         if self.ent_ricerca.get()=="":
             self.aggiorna_tabella()
             return
@@ -361,14 +384,15 @@ class App:
         colonna = self.tabella.identify_column(event.x)
         cella = self.tabella.identify_region(event.x, event.y)
         
-        if cella == "cell" and colonna == "#8": 
+        if cella == "cell" and colonna == "#9": 
             if riga:
                 valori = self.tabella.item(riga, 'values')
-                url = valori[7]
+                url = valori[8]
                 if url.startswith("http://") or url.startswith("https://"):
                     webbrowser.open_new_tab(url)      
                 else:
                     messagebox.showwarning("Attenzione!", "Link non valido")
+    
     #Modifica set                
     def modifica(self, event):
         riga = self.tabella.identify_row(event.y)
@@ -378,22 +402,29 @@ class App:
             self.indice = int(riga)
             self.percorso_immagine = self.set_lego[self.indice].immagine
             
-            self.aggiungi()
+            if self.agg_set is None or not self.agg_set.winfo_exists():
+                self.aggiungi()
+                
             self.aggiunta.configure(text = "Modifica set", command= lambda: self.aggiungere(1))
             self.agg_set.title("Modifica set")    
             
             self.aggiunta_immagine(self.set_lego[self.indice].immagine)      # perchè se modifico un secondo set senza cambiare immagine prende quelle vecchia
 
-            valori = self.tabella.item(riga, 'values')                   
-            self.ent1.insert(0,valori[0])
-            self.ent2.insert(0,valori[1])
-            self.ent3.insert(0,valori[2])
-            self.ent4.insert(0,valori[3])
-            self.ent5.insert(0,valori[4])
-            self.ent6.insert(0,valori[5])
-            self.ent7.insert(0,valori[6].replace("€", ""))
-            self.ent8.insert(0,valori[7])
-
+            valori = self.tabella.item(riga, 'values')
+            for e in [self.ent1, self.ent2, self.ent3, self.ent4, self.ent5, self.ent6, self.ent7, self.ent8]:    #Pulizia entry precedenti
+                e.delete(0, "end")
+                               
+            self.ent1.insert(0,valori[1])
+            self.ent2.insert(0,valori[2])
+            self.ent3.insert(0,valori[3])
+            self.ent4.insert(0,valori[4])
+            self.ent5.insert(0,valori[5])
+            self.ent6.insert(0,valori[6])
+            self.ent7.insert(0,valori[7].replace("€", ""))
+            self.ent8.insert(0,valori[8])
+        
+        self.controllo_senza_salvare = True
+    
     #Elimina set lego
     def elimina(self, event):
         riga = self.tabella.identify_row(event.y)
