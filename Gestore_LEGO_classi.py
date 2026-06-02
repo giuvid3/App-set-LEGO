@@ -146,7 +146,9 @@ class App:
     #Chiusura finestre
     def chiudi(self, finestra_da_chiudere):
         if self.controllo_senza_salvare==True and finestra_da_chiudere== self.finestra:
-            self.sicuro()
+            if not self.sicuro():
+                return
+
         if finestra_da_chiudere is not None and finestra_da_chiudere.winfo_exists():
             finestra_da_chiudere.destroy() 
             if finestra_da_chiudere == self.finestra:       
@@ -298,8 +300,11 @@ class App:
         risposta = messagebox.askyesno("Cosa vuoi fare?", "Non hai salvato il lavoro, vuoi salvarlo adesso?")
         if risposta:
             self.salva(0)
-        else:
-            pass
+
+            if self.controllo_senza_salvare:
+                return False
+
+        return True
     
     #Aggiornamento tabella   
     def carica_tabella(self, info, indice_reale):     
