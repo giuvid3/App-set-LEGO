@@ -312,25 +312,26 @@ class App:
         else:
             if self.percorso==None or x == 1:
                 self.percorso = filedialog.asksaveasfilename(defaultextension=".json", title="Scegli dove salvare i set lego", filetypes=[("File JSON", ".json")])
-            if self.percorso:
-                lista = []
+            if not self.percorso:    #se viene chiusa la scheda il percorso non c'è ed esce dalla funzione
+                return
+            lista = []
 
-                for set in self.set_lego:
-                    diz = {
-                        "tipologia": set.tipologia,
-                        "nome": set.nome,
-                        "eta": set.eta,
-                        "anno": set.anno,
-                        "id": set.id,
-                        "numero_pezzi": set.numero_pezzi,
-                        "prezzo": set.prezzo,
-                        "link": set.link,
-                        "immagine": set.immagine
-                    }
-                    lista.append(diz)
+            for set in self.set_lego:
+                diz = {
+                    "tipologia": set.tipologia,
+                    "nome": set.nome,
+                    "eta": set.eta,
+                    "anno": set.anno,
+                    "id": set.id,
+                    "numero_pezzi": set.numero_pezzi,
+                    "prezzo": set.prezzo,
+                    "link": set.link,
+                    "immagine": set.immagine
+                }
+                lista.append(diz)
 
-                with open(self.percorso, "w") as file:
-                    json.dump(lista, file, indent=4)
+            with open(self.percorso, "w") as file:
+                json.dump(lista, file, indent=4)        
         self.controllo_senza_salvare = False
     
     #Se non hai salvato il lavoro  
