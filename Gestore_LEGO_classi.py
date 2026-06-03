@@ -45,8 +45,7 @@ class App:
         self.label_sfondo = ctk.CTkLabel(self.win, image=img_sfondo, text="")
         self.label_sfondo.place(x=0, y=0, relwidth=1, relheight=1)
         
-        crea_btn = ctk.CTkButton(self.win, text="Crea nuovo gestore", width=400, height=100 , font=ctk.CTkFont(size=
-                                                                                                               40, weight="bold"), cursor="hand2", corner_radius=32, command= lambda: self.crea(0))
+        crea_btn = ctk.CTkButton(self.win, text="Crea nuovo gestore", width=400, height=100 , font=ctk.CTkFont(size=40, weight="bold"), cursor="hand2", corner_radius=32, command= lambda: self.crea(0))
         crea_btn.place(relx=0.5, rely=0.4, anchor="center")
 
         apri_btn=ctk.CTkButton(self.win, text="Apri set già esistenti", width=400, height=100, font=ctk.CTkFont(size=40, weight="bold"), cursor="hand2", corner_radius=32, command=lambda: self.crea(1))
@@ -84,7 +83,7 @@ class App:
                         immagine = caricare["immagine"]
                     )
                     self.set_lego.append(set_caricato)
-                except:
+                except KeyError:           #se manca un campo
                     messagebox.showerror("Errore", "Formato file non valido, apertura gestore vuoto")
                     return
                     
@@ -103,10 +102,11 @@ class App:
             self.finestra.geometry("1600x820")
             self.finestra.minsize(1600, 820)
             self.finestra.title("Gestore")
-            self.finestra.lift()       
+            self.finestra.lift()
+            self.finestra.wm_iconbitmap("icona.ico")
             self.finestra.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.finestra))  #se viene premuta la x si esegue la funzione chiudi        
-            self.win.withdraw()
-            #viene nascosta la win iniziale
+            self.win.withdraw()         #viene nascosta la win iniziale
+            
             info_btn = ctk.CTkButton(self.finestra, text="Informazioni", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= self.informazioni)
             info_btn.grid(row = 0, column = 0, padx=30, pady =15)
             
@@ -175,7 +175,7 @@ class App:
         if finestra_da_chiudere is not None and finestra_da_chiudere.winfo_exists():
             finestra_da_chiudere.destroy() 
             if finestra_da_chiudere == self.finestra:       
-                self.win.deiconify()
+                self.win.deiconify()            #La finestra viene ripristinata
             else:
                 pass    
     
@@ -187,7 +187,8 @@ class App:
             self.agg_set.geometry("1080x720")
             self.agg_set.minsize(1080, 720)
             self.agg_set.title("Nuovo set")               
-            self.agg_set.grab_set()     
+            self.agg_set.grab_set()
+            self.agg_set.wm_iconbitmap("icona.ico")
             self.agg_set.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.agg_set))
 
 
@@ -353,7 +354,7 @@ class App:
         self.tabella.delete(*self.tabella.get_children())                  #cancella ogni riga della tabella ttk
         
         
-        for indice, dati in enumerate(self.set_lego):                     #enumerate serve a trovare indice del set
+        for indice, dati in enumerate(self.set_lego):                     #enumerate serve a restituire indice e dato del set nello stesso momento
             
             self.carica_tabella(dati, indice)
         
@@ -362,12 +363,12 @@ class App:
         self.tabella.delete(*self.tabella.get_children())                  
         self.salva_immagini = []
         
-        ricerca=self.ent_ricerca.get().lower().strip()
-        if self.ent_ricerca.get()=="":
+        ricerca=self.ent_ricerca.get().strip().lower()
+        if ricerca == "":
             self.aggiorna_tabella()
             return
             
-        for indice, dati in enumerate(self.set_lego):
+        for indice, dati in enumerate(self.set_lego):                   
             if ricerca in str(dati.tipologia).lower() or ricerca in str(dati.nome).lower() or ricerca in str(dati.anno).lower() or ricerca in str(dati.eta).lower() or ricerca in str(dati.id).lower() or ricerca in str(dati.prezzo).lower() or ricerca in str(dati.numero_pezzi).lower():
                 self.carica_tabella(dati, indice)
                     
@@ -458,7 +459,8 @@ class App:
             self.info.minsize(1080, 900)
             self.info.config(background="white")
             self.info.title("Informazioni sul programma")               
-            self.info.grab_set()     
+            self.info.grab_set()
+            self.info.wm_iconbitmap("icona.ico")
             self.info.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.info))
             
             self.frame = ctk.CTkScrollableFrame(self.info, fg_color="white")
