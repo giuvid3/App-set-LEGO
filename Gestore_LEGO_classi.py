@@ -186,63 +186,75 @@ class App:
                     
         if self.agg_set is None or not self.agg_set.winfo_exists():
             self.agg_set = customtkinter.CTkToplevel(self.finestra)
-            self.agg_set.geometry("1080x720")
-            self.agg_set.minsize(1080, 720)
-            self.agg_set.title("Nuovo set")               
+            self.agg_set.geometry("950x720")
+            self.agg_set.minsize(950, 720)
+            self.agg_set.resizable(False, False)
+            self.agg_set.title("Nuovo set")
             self.agg_set.grab_set()
             self.agg_set.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.agg_set))
 
+            titolo = ctk.CTkLabel(self.agg_set, text="➕ Aggiungi un nuovo Set LEGO", font=ctk.CTkFont(size=28, weight="bold"), text_color="#3C64BB")
+            titolo.grid(row=0, column=0, columnspan=3, pady=(20, 30))
 
-            l1 = ctk.CTkLabel(self.agg_set, text="Tipologia del set lego:" )
-            l1.grid(row=0, column=0, padx=30, pady=20)
+            frame_img = ctk.CTkFrame(self.agg_set, width=300, corner_radius=15)                 #frame immagine che occupa 9 righe
+            frame_img.grid(row=1, column=2, rowspan=8, padx=(40, 30), pady=20, sticky="nsew")         
+            frame_img.grid_columnconfigure(0, weight=1)
+            frame_img.grid_rowconfigure(0, weight=1)    #le righe si adattano per rendere centrato il contenuto
+            frame_img.grid_rowconfigure(1, weight=0)
+            frame_img.grid_rowconfigure(2, weight=0)
+            frame_img.grid_rowconfigure(3, weight=1)
+            
+            limg = ctk.CTkLabel(frame_img, text="Immagine del set", font=ctk.CTkFont(size=22, weight="bold"))
+            limg.grid(row=0, column=0, padx=20, pady=(20, 10))
+
+            btnimg = ctk.CTkButton(frame_img, text="Scegli immagine", width=180, height=35, font=ctk.CTkFont(size=16, weight="bold"), corner_radius=12, command=self.immagine)
+            btnimg.grid(row=3, column=0, padx=20, pady=(10, 20))
+
+            self.foto = ctk.CTkLabel(frame_img, text="", width=220, height=220)
+            self.foto.grid(row=2, column=0, padx=20, pady=20)
+
+            l1 = ctk.CTkLabel(self.agg_set, text="Tipologia del set lego:", font=ctk.CTkFont(size=14, weight="bold"))
+            l1.grid(row=1, column=0, padx=30, pady=20)
             self.ent1 = ctk.CTkEntry(self.agg_set, width=300)
-            self.ent1.grid(row=0, column=1, padx=30, pady=20)
-            
-            l2 = ctk.CTkLabel(self.agg_set, text="Nome set lego:" )
-            l2.grid(row=1, column=0, padx=30, pady=20)
+            self.ent1.grid(row=1, column=1, padx=30, pady=20)
+
+            l2 = ctk.CTkLabel(self.agg_set, text="Nome set lego:", font=ctk.CTkFont(size=14, weight="bold"))
+            l2.grid(row=2, column=0, padx=30, pady=20)
             self.ent2 = ctk.CTkEntry(self.agg_set, width=300)
-            self.ent2.grid(row=1, column=1, padx=30, pady=20)
-            
-            l3 = ctk.CTkLabel(self.agg_set, text="Età necessaria:" )
-            l3.grid(row=2, column=0, padx=30, pady=20)
+            self.ent2.grid(row=2, column=1, padx=30, pady=20)
+
+            l3 = ctk.CTkLabel(self.agg_set, text="Età necessaria:", font=ctk.CTkFont(size=14, weight="bold"))
+            l3.grid(row=3, column=0, padx=30, pady=20)
             self.ent3 = ctk.CTkEntry(self.agg_set, width=300)
-            self.ent3.grid(row=2, column=1, padx=30, pady=20)
-            
-            l4 = ctk.CTkLabel(self.agg_set, text="Anno di uscita:" )
-            l4.grid(row=3, column=0, padx=30, pady=20)
+            self.ent3.grid(row=3, column=1, padx=30, pady=20)
+
+            l4 = ctk.CTkLabel(self.agg_set, text="Anno di uscita:", font=ctk.CTkFont(size=14, weight="bold"))
+            l4.grid(row=4, column=0, padx=30, pady=20)
             self.ent4 = ctk.CTkEntry(self.agg_set, width=300)
-            self.ent4.grid(row=3, column=1, padx=30, pady=20)
-            
-            l5 = ctk.CTkLabel(self.agg_set, text="Id lego:" )
-            l5.grid(row=4, column=0, padx=30, pady=20)
+            self.ent4.grid(row=4, column=1, padx=30, pady=20)
+
+            l5 = ctk.CTkLabel(self.agg_set, text="Id lego:", font=ctk.CTkFont(size=14, weight="bold"))
+            l5.grid(row=5, column=0, padx=30, pady=20)
             self.ent5 = ctk.CTkEntry(self.agg_set, width=300)
-            self.ent5.grid(row=4, column=1, padx=30, pady=20)
-            
-            limg = ctk.CTkLabel(self.agg_set, text="Inserisci l'immagine del set:")
-            limg.grid(row=4, column=2, padx=30, pady=20)
-            btnimg = ctk.CTkButton(self.agg_set, text="Scegli immagine", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= self.immagine)
-            btnimg.grid(row=5, column=2)
-            
-            self.foto = ctk.CTkLabel(self.agg_set, width=150, height=150, text="")
-            self.foto.grid(row=4 , column=3)
-            
-            l6 = ctk.CTkLabel(self.agg_set, text="Numero pezzi:" )
-            l6.grid(row=5, column=0, padx=30, pady=20)
+            self.ent5.grid(row=5, column=1, padx=30, pady=20)
+
+            l6 = ctk.CTkLabel(self.agg_set, text="Numero pezzi:", font=ctk.CTkFont(size=14, weight="bold"))
+            l6.grid(row=6, column=0, padx=30, pady=20)
             self.ent6 = ctk.CTkEntry(self.agg_set, width=300)
-            self.ent6.grid(row=5, column=1, padx=30, pady=20)
-            
-            l7 = ctk.CTkLabel(self.agg_set, text="Prezzo(euro):" )
-            l7.grid(row=6, column=0, padx=30, pady=20)
+            self.ent6.grid(row=6, column=1, padx=30, pady=20)
+
+            l7 = ctk.CTkLabel(self.agg_set, text="Prezzo(euro):", font=ctk.CTkFont(size=14, weight="bold"))
+            l7.grid(row=7, column=0, padx=30, pady=20)
             self.ent7 = ctk.CTkEntry(self.agg_set, width=300)
-            self.ent7.grid(row=6, column=1, padx=30, pady=20)
-            
-            l8 = ctk.CTkLabel(self.agg_set, text="Link al sito ufficiale:" )
-            l8.grid(row=7, column=0, padx=30, pady=20)
+            self.ent7.grid(row=7, column=1, padx=30, pady=20)
+
+            l8 = ctk.CTkLabel(self.agg_set, text="Link al sito ufficiale:", font=ctk.CTkFont(size=14, weight="bold"))
+            l8.grid(row=8, column=0, padx=30, pady=20)
             self.ent8 = ctk.CTkEntry(self.agg_set, width=300)
-            self.ent8.grid(row=7, column=1, padx=30, pady=20)
-            
-            self.aggiunta = ctk.CTkButton(self.agg_set, text="Aggiungi il set", width=150, height=30 , font=ctk.CTkFont(size=20, weight="bold"), cursor="hand2", corner_radius=12, command= lambda: self.aggiungere(0))        
-            self.aggiunta.grid(row=8, column=0, padx=30, pady=20)
+            self.ent8.grid(row=8, column=1, padx=30, pady=20)
+
+            self.aggiunta = ctk.CTkButton(self.agg_set, text="💾 Aggiungi il Set", width=150, height=30, font=ctk.CTkFont(size=18, weight="bold"), cursor="hand2", corner_radius=12, fg_color="#2E8B57", hover_color="#246B45",command=lambda: self.aggiungere(0))
+            self.aggiunta.grid(row=9, column=1, pady=20)
     
     #Aggiunta set lego            
     def aggiungere(self, x):
@@ -382,7 +394,7 @@ class App:
     #Caricamento immagine
     def aggiunta_immagine(self, percorso):
         if percorso:
-            img = ctk.CTkImage(light_image=Image.open(percorso), size=(150, 150))
+            img = ctk.CTkImage(light_image=Image.open(percorso), size=(220, 220))
             self.salva_immagini.append(img)
             self.foto.configure(image=img)
       
