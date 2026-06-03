@@ -6,7 +6,6 @@ from PIL import Image, ImageTk
 import webbrowser
 import json
 
-
 @dataclass
 class Lego:
     tipologia: str
@@ -42,7 +41,6 @@ class App:
         self.win.resizable(False, False)
         self.win.minsize(1080, 720)
         self.win.iconbitmap("icona.ico")
-        
         img_sfondo = ctk.CTkImage(light_image=Image.open("sfondo.png"), dark_image=Image.open("sfondo.png"), size=(1080, 720))
     
         self.label_sfondo = ctk.CTkLabel(self.win, image=img_sfondo, text="")
