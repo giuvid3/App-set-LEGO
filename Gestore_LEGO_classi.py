@@ -34,12 +34,15 @@ class App:
         self.indice= None                       #|
 
         
+        
+        
         self.win = ctk.CTk()
         self.win.geometry("1080x720")
         self.win.title("Gestore set LEGO")
         self.win.resizable(False, False)
         self.win.minsize(1080, 720)
-        self.win.wm_iconbitmap("icona.ico")
+        self.win.iconbitmap("icona.ico")
+        
         img_sfondo = ctk.CTkImage(light_image=Image.open("sfondo.png"), dark_image=Image.open("sfondo.png"), size=(1080, 720))
     
         self.label_sfondo = ctk.CTkLabel(self.win, image=img_sfondo, text="")
@@ -103,7 +106,6 @@ class App:
             self.finestra.minsize(1600, 820)
             self.finestra.title("Gestore")
             self.finestra.lift()
-            self.finestra.wm_iconbitmap("icona.ico")
             self.finestra.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.finestra))  #se viene premuta la x si esegue la funzione chiudi        
             self.win.withdraw()         #viene nascosta la win iniziale
             
@@ -188,7 +190,6 @@ class App:
             self.agg_set.minsize(1080, 720)
             self.agg_set.title("Nuovo set")               
             self.agg_set.grab_set()
-            self.agg_set.wm_iconbitmap("icona.ico")
             self.agg_set.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.agg_set))
 
 
@@ -460,7 +461,6 @@ class App:
             self.info.config(background="white")
             self.info.title("Informazioni sul programma")               
             self.info.grab_set()
-            self.info.wm_iconbitmap("icona.ico")
             self.info.protocol("WM_DELETE_WINDOW", lambda: self.chiudi(self.info))
             
             self.frame = ctk.CTkScrollableFrame(self.info, fg_color="white")
