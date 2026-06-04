@@ -37,7 +37,7 @@ Tutti i dati vengono memorizzati in formato JSON per una gestione più facile.
 
 ### 🔍 Ricerca Rapida
 
-Ricerca istantanea tramite:
+Ricerca tramite:
 
 * Nome del set
 * Tipologia
